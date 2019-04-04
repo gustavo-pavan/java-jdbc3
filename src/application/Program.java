@@ -2,7 +2,9 @@ package application;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -20,12 +22,16 @@ public class Program {
 		try {
 			
 			conn = DB.getConnetion();
+			
 			// Query para inserir dados
+			// Statement.RETURN_GENERATED_KEYS -> retorna o ID do ultimo registro
+			
 			st = conn.prepareStatement(
 					 "INSERT INTO seller "
 					+"(Name, Email, BirthDate, BaseSalary, DepartmentId) "
 					+"VALUES "
-					+"(?, ?, ?, ?, ?)");
+					+"(?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
 			
 			// Paramteros para inserir			
 			st.setString(1, "Carl Purple"); // o primeiro parametro refere-se ao interregoção da query
@@ -38,7 +44,18 @@ public class Program {
 			
 			// pegar quantidade de linhas afetadas no banco
 			int rowsAffected = st.executeUpdate();
-			System.out.println("Done! Rows Affected: " + rowsAffected);
+			
+			if(rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys(); //pegar id de retorno
+				while(rs.next()) {
+					
+					int id = rs.getInt(1); // pegar o dado na primeira posição
+					System.out.println("Done! Id = " + id);
+				}
+			}
+			else {
+				System.out.println("No rown affected!");
+			}
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
